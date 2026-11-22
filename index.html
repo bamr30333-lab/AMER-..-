@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>عامر اوليفر | DARK FIELD TERMINAL</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #050000;
+      color: #ff2a2a;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    canvas#matrix-bg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .shake {
+      animation: screenShake 0.35s linear;
+    }
+
+    @keyframes screenShake {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      20% { transform: translate(-6px, 4px) rotate(-0.5deg); }
+      40% { transform: translate(6px, -4px) rotate(0.5deg); }
+      60% { transform: translate(-5px, -3px) rotate(-0.4deg); }
+      80% { transform: translate(5px, 3px) rotate(0.4deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 20px 14px 50px;
+    }
+
+    .lock-screen, .dashboard {
+      background: rgba(12, 0, 0, 0.88);
+      border: 1.5px solid #ff1e1e;
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.35), inset 0 0 20px rgba(140, 0, 0, 0.25);
+      border-radius: 16px;
+      padding: 24px 18px;
+      backdrop-filter: blur(6px);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .profile-box {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .avatar-wrap {
+      width: 118px;
+      height: 118px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      padding: 4px;
+      background: linear-gradient(180deg, #ff1a1a, #2b0000);
+      box-shadow: 0 0 22px rgba(255, 20, 20, 0.75);
+      position: relative;
+    }
+
+    .avatar-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      background: #140000;
+      display: block;
+    }
+
+    .drip-tag {
+      display: inline-block;
+      background: #2b0000;
+      color: #ff6b6b;
+      border: 1px solid #ff1e1e;
+      padding: 3px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .user-name {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 0 12px #ff0000, 0 0 26px #990000;
+      margin-bottom: 4px;
+    }
+
+    .sub-title {
+      font-size: 13px;
+      color: #ff8585;
+      letter-spacing: 1px;
+    }
+
+    .input-group {
+      margin: 14px 0;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: #ff9e9e;
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #8a0000;
+      background: #090000;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: #ff2a2a;
+      box-shadow: 0 0 12px rgba(255, 30, 30, 0.45);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-red {
+      background: linear-gradient(90deg, #8f0000, #e60000);
+      color: #fff;
+      box-shadow: 0 0 16px rgba(255, 0, 0, 0.45);
+    }
+
+    .btn-red:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+
+    .btn-dark {
+      background: #170000;
+      color: #ff9494;
+      border: 1px solid #660000;
+    }
+
+    .btn-dark:hover {
+      background: #260000;
+      color: #fff;
+    }
+
+    .error-msg {
+      color: #ff4d4d;
+      background: rgba(120, 0, 0, 0.28);
+      border: 1px solid #990000;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #4a0000;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .badge-live {
+      background: #3d0000;
+      color: #ff5555;
+      border: 1px solid #ff1e1e;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 540px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stats-box {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .stat-card {
+      background: #0d0000;
+      border: 1px solid #590000;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ff3b3b;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #d68a8a;
+      margin-top: 2px;
+    }
+
+    .terminal {
+      background: #040000;
+      border: 1px solid #660000;
+      border-radius: 10px;
+      padding: 12px;
+      height: 210px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: #ff7777;
+      margin-top: 14px;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .log-red { color: #ff3333; }
+    .log-white { color: #ffffff; }
+    .log-warn { color: #ffaa44; }
+
+    .customize-panel {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px dashed #660000;
+    }
+
+    .sound-hint {
+      font-size: 12px;
+      color: #ff7a7a;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix-bg"></canvas>
+
+  <div class="container" id="app-root">
+    <!-- شاشة القفل -->
+    <section class="lock-screen" id="lock-screen">
+      <div class="profile-box">
+        <div class="drip-tag">☠ DARK FIELD ACCESS ☠</div>
+        <div class="avatar-wrap">
+          <img id="lock-avatar" src="" alt="Avatar" />
+        </div>
+        <div class="user-name" id="lock-name">عامر اوليفر</div>
+        <div class="sub-title">أدخل كلمة المرور بالإنجليزية لفتح النظام</div>
+      </div>
+
+      <div class="input-group">
+        <label for="pass-input">Password (English Only)</label>
+        <input type="password" id="pass-input" dir="ltr" placeholder="Enter English password..." autocomplete="off" />
+      </div>
+
+      <button class="btn btn-red" id="unlock-btn">دخول النظام</button>
+      <button class="btn btn-dark" id="laugh-btn-lock">تشغيل الضحكة الشريرة الآن</button>
+      <button class="btn btn-dark" id="toggle-custom-lock">تخصيص اسمي وصورتي والباسورد</button>
+
+      <div id="lock-error" class="error-msg hidden">كلمة المرور غير صحيحة! حاول مرة أخرى.</div>
+
+      <div class="customize-panel hidden" id="custom-panel-lock"></div>
+      <div class="sound-hint" id="sound-status">جاري تفعيل صوت الضحكة الشريرة تلقائياً...</div>
+    </section>
+
+    <!-- لوحة التحكم -->
+    <section class="dashboard hidden" id="dashboard">
+      <div class="top-bar">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="avatar-wrap" style="width:54px;height:54px;margin:0;">
+            <img id="dash-avatar" src="" alt="Avatar" />
+          </div>
+          <div>
+            <div class="user-name" id="dash-name" style="font-size:19px;margin:0;">عامر اوليفر</div>
+            <div class="sub-title" style="font-size:11px;">محاكاة بصرية ترفيهية - المجال</div>
+          </div>
+        </div>
+        <div class="badge-live">● SYSTEM ACTIVE</div>
+      </div>
+
+      <div class="grid-2">
+        <div class="input-group" style="margin:0;">
+          <label for="target-input">الهدف الوهمي (يوزر / رقم / رابط)</label>
+          <input type="text" id="target-input" placeholder="@target_account" />
+        </div>
+        <div class="input-group" style="margin:0;">
+          <label for="reason-select">نوع البلاغ الوهمي</label>
+          <select id="reason-select">
+            <option value="SPAM_FLOOD">سبام وتكرار مزعج (محاكاة)</option>
+            <option value="FAKE_ENTITY">انتحال وهوية وهمية (محاكاة)</option>
+            <option value="ABUSE_STORM">محتوى مسيء ومخالف (محاكاة)</option>
+            <option value="DARK_FIELD_PULSE">نبضة المجال المظلم (محاكاة)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stats-box">
+        <div class="stat-card">
+          <div class="stat-num" id="sent-count">0</div>
+          <div class="stat-label">بلاغات وهمية مرسلة</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="wave-count">0</div>
+          <div class="stat-label">موجات المجال</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="power-level">100%</div>
+          <div class="stat-label">طاقة المحرك</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <button class="btn btn-red" id="start-sim-btn">بدء المحاكاة المرعبة</button>
+        <button class="btn btn-dark" id="stop-sim-btn">إيقاف المحاكاة</button>
+      </div>
+
+      <div class="grid-2">
+        <button class="btn btn-dark" id="laugh-btn-dash">ضحكة شريرة</button>
+        <button class="btn btn-dark" id="toggle-custom-dash">تعديل الاسم والصورة والباسورد</button>
+      </div>
+
+      <button class="btn btn-dark" id="lock-again-btn">قفل الشاشة</button>
+
+      <div class="customize-panel hidden" id="custom-panel-dash"></div>
+
+      <div class="terminal" id="terminal">
+        <div class="log-red">[BOOT] Dark Field Visual Simulator initialized...</div>
+        <div class="log-white">[INFO] Visual simulation only — no external reports are actually sent.</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- قالب لوحة التخصيص -->
+  <template id="custom-template">
+    <h3 style="color:#fff;font-size:16px;margin-bottom:10px;">تخصيص الهوية وكلمة المرور (حفظ تلقائي)</h3>
+
+    <div class="input-group">
+      <label class="custom-name-label">الاسم الظاهر في الموقع</label>
+      <input type="text" class="custom-name-input" placeholder="اكتب اسمك..." />
+    </div>
+
+    <div class="input-group">
+      <label class="custom-pass-label">كلمة المرور بالإنجليزية فقط (حروف وأرقام إنجليزية)</label>
+      <input type="text" class="custom-pass-input" dir="ltr" placeholder="amer" />
+    </div>
+
+    <div class="input-group">
+      <label class="custom-photo-label">اختر صورتك من الهاتف أو الجهاز</label>
+      <input type="file" class="custom-photo-input" accept="image/*" />
+    </div>
+
+    <button type="button" class="btn btn-dark custom-reset-btn">استعادة الإعدادات الافتراضية</button>
+  </template>
+
+  <script>
+    const DEFAULT_NAME = "عامر اوليفر";
+    const DEFAULT_PASS = "amer";
+
+    function createDefaultAvatarDataUrl() {
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+          <defs>
+            <radialGradient id="bg" cx="50%" cy="40%" r="65%">
+              <stop offset="0%" stop-color="#450000"/>
+              <stop offset="100%" stop-color="#070000"/>
+            </radialGradient>
+          </defs>
+          <rect width="240" height="240" fill="url(#bg)"/>
+          <circle cx="120" cy="96" r="44" fill="#180000" stroke="#ff2222" stroke-width="4"/>
+          <circle cx="104" cy="92" r="7" fill="#ff2a2a"/>
+          <circle cx="136" cy="92" r="7" fill="#ff2a2a"/>
+          <path d="M96 116 Q
